@@ -1,7 +1,7 @@
 // src/pages/ActivityList.tsx
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { getActivities } from "../api";
 
 interface Activity {
     id: number;
@@ -11,37 +11,27 @@ interface Activity {
 
 export default function ActivityList() {
     const [activities, setActivities] = useState<Activity[]>([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchActivities = async () => {
-            try {
-                const res = await axios.get("http://localhost:5000/api/activities");
-                setActivities(res.data);
-            } catch (err) {
-                console.error("获取活动失败", err);
-            }
-        };
-        fetchActivities();
+        getActivities()
+            .then((res) => setActivities(res.data))
+            .catch((err) => console.error(err));
     }, []);
 
     return (
-        <div className="max-w-3xl mx-auto mt-8">
+        <div className="max-w-xl mx-auto p-4">
             <h1 className="text-2xl font-bold mb-4">活动列表</h1>
-            {activities.length === 0 && <p>暂无活动</p>}
-            <ul>
-                {activities.map(activity => (
-                    <li key={activity.id} className="mb-4 border p-4 rounded shadow">
-                        <h2 className="text-xl font-semibold">{activity.title}</h2>
-                        <p className="text-gray-700">{activity.description}</p>
-                        <Link
-                            to={`/activities/${activity.id}`}
-                            className="text-blue-600 hover:underline"
-                        >
-                            查看详情
-                        </Link>
-                    </li>
-                ))}
-            </ul>
+            {activities.map((activity) => (
+                <div
+                    key={activity.id}
+                    className="border p-4 mb-3 rounded hover:bg-gray-100 cursor-pointer"
+                    onClick={() => navigate(`/activities/${activity.id}`)}
+                >
+                    <h2 className="text-xl font-semibold">{activity.title}</h2>
+                    <p className="text-gray-700">{activity.description}</p>
+                </div>
+            ))}
         </div>
     );
 }
